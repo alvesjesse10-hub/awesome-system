@@ -13,6 +13,9 @@ import { AccountTransfersModule } from './account-transfers/account-transfers.mo
 import { FinancialEntriesModule } from './financial-entries/financial-entries.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ReportsModule } from './reports/reports.module';
+import { RevenueGoalsModule } from './revenue-goals/revenue-goals.module';
+import { RevenueProjectionsModule } from './revenue-projections/revenue-projections.module';
+import { SimplesNacionalModule } from './simples-nacional/simples-nacional.module';
 
 @Module({
   imports: [
@@ -29,6 +32,9 @@ import { ReportsModule } from './reports/reports.module';
     FinancialEntriesModule,
     JobsModule,
     ReportsModule,
+    RevenueGoalsModule,
+    RevenueProjectionsModule,
+    SimplesNacionalModule,
   ],
 })
 export class AppModule {}
