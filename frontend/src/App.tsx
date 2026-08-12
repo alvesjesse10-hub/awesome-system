@@ -7,16 +7,16 @@ import { AppLayout } from '@/components/layout/app-layout'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { ComingSoonPage } from '@/pages/coming-soon-page'
+import { ClientsPage } from '@/pages/clients-page'
+import { SuppliersPage } from '@/pages/suppliers-page'
+import { EmployeesPage } from '@/pages/employees-page'
+import { CostCentersPage } from '@/pages/cost-centers-page'
+import { BankAccountsPage } from '@/pages/bank-accounts-page'
+import { ChartOfAccountsPage } from '@/pages/chart-of-accounts-page'
+import { FinancialEntriesPage } from '@/pages/financial-entries-page'
 
 const comingSoon: { path: string; title: string }[] = [
-  { path: '/lancamentos', title: 'Lançamentos Financeiros' },
   { path: '/jobs', title: 'Jobs / Projetos' },
-  { path: '/clientes', title: 'Clientes' },
-  { path: '/fornecedores', title: 'Fornecedores' },
-  { path: '/colaboradores', title: 'Colaboradores' },
-  { path: '/contas-bancarias', title: 'Contas Bancárias' },
-  { path: '/plano-de-contas', title: 'Plano de Contas' },
-  { path: '/centros-de-custo', title: 'Centros de Custo' },
   { path: '/metas', title: 'Metas e Projeções' },
   { path: '/relatorios', title: 'Relatórios' },
 ]
@@ -31,6 +31,13 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
+                <Route path="/lancamentos" element={<FinancialEntriesPage />} />
+                <Route path="/clientes" element={<ClientsPage />} />
+                <Route path="/fornecedores" element={<SuppliersPage />} />
+                <Route path="/colaboradores" element={<EmployeesPage />} />
+                <Route path="/contas-bancarias" element={<BankAccountsPage />} />
+                <Route path="/plano-de-contas" element={<ChartOfAccountsPage />} />
+                <Route path="/centros-de-custo" element={<CostCentersPage />} />
                 {comingSoon.map((route) => (
                   <Route key={route.path} path={route.path} element={<ComingSoonPage title={route.title} />} />
                 ))}
