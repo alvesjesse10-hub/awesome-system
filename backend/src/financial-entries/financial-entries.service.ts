@@ -266,20 +266,25 @@ export class FinancialEntriesService {
       );
     }
 
-    let chartOfAccount: { id: string; group: ChartAccountGroup } | null = null;
+    let chartOfAccountPromise: Promise<{ id: string; group: ChartAccountGroup } | null> | null = null;
     if (dto.chartOfAccountId) {
-      chartOfAccount = await this.prisma.chartOfAccount.findUnique({
+      chartOfAccountPromise = this.prisma.chartOfAccount.findUnique({
         where: { id: dto.chartOfAccountId },
         select: { id: true, group: true },
       });
-      if (!chartOfAccount) {
-        throw new NotFoundException('Categoria do plano de contas não encontrada.');
-      }
     } else if (!options.partial) {
       throw new BadRequestException('chartOfAccountId é obrigatório.');
     }
 
-    await Promise.all(checks);
+    // Dispara todas as verificações (incluindo o plano de contas) num único
+    // Promise.all, sem nenhum `await` entre a criação das promises e essa
+    // linha — se alguma checagem rejeitar antes de o plano de contas ser
+    // aguardado separadamente, ela ficaria sem handler por um instante e
+    // poderia disparar um unhandledRejection.
+    const [chartOfAccount] = await Promise.all([chartOfAccountPromise ?? Promise.resolve(null), ...checks]);
+    if (dto.chartOfAccountId && !chartOfAccount) {
+      throw new NotFoundException('Categoria do plano de contas não encontrada.');
+    }
     return chartOfAccount;
   }
 }
