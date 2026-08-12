@@ -1,0 +1,17 @@
+{
+  "name": "ambiens-financeiro-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend do sistema de controle financeiro e gestao de projetos do grupo Ambiens",
+  "scripts": {
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0"
+  }
+}

@@ -1,0 +1,684 @@
+// ============================================================================
+// Sistema de Controle Financeiro e Gestão de Projetos — Grupo Ambiens
+// Schema proposto (fase 1: modelagem). Ver docs/MODELO_DE_DADOS.md para as
+// decisões de design e os pontos que precisam de validação do cliente.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Enums
+// ----------------------------------------------------------------------------
+
+enum UserRole {
+  ADMIN
+  FINANCEIRO
+  COMERCIAL
+  VISUALIZADOR
+}
+
+enum TaxRegime {
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+}
+
+enum BankAccountType {
+  CHECKING // conta corrente
+  INVESTMENT // aplicação / investimento
+}
+
+// Grupos do plano de contas (nível raiz da hierarquia)
+enum ChartAccountGroup {
+  RECEITA
+  CUSTO_FIXO
+  DESPESA_FIXA
+  CUSTO_VARIAVEL
+  DESPESA_VARIAVEL
+  BONIFICACAO
+  INVESTIMENTO
+}
+
+// Natureza do lançamento para fins de DRE/fluxo de caixa — derivada do grupo
+// do plano de contas no momento do salvamento (RECEITA => REVENUE, resto => EXPENSE)
+enum EntryNature {
+  REVENUE
+  EXPENSE
+}
+
+// "Atrasado" NÃO é persistido aqui — é calculado em tempo de consulta
+// (PENDING + dueDate < hoje). Ver docs/MODELO_DE_DADOS.md.
+enum EntryStatus {
+  PENDING
+  PAID
+}
+
+enum CommissionType {
+  PERCENTAGE
+  FIXED
+}
+
+enum JobType {
+  JOB
+  VERSAO
+  PACOTE
+}
+
+enum ServiceType {
+  CRIACAO
+  ALTERACAO
+  EXECUTIVO
+  VIDEO
+}
+
+enum CompetitionStatus {
+  CONCORRENCIA
+  JOB_FECHADO
+}
+
+enum Temperature {
+  MORNO
+  GO
+  QUENTE
+  FRIO
+}
+
+enum ProjectType {
+  REGULAR
+  QUEIMA_ROUPA
+  BURACO_NEGRO
+}
+
+enum ProductType {
+  CENOGRAFIA_FISICA
+  ARQUITETURA
+}
+
+enum EventType {
+  ESTANDE
+  FESTIVAL
+  EVENTO
+  QUIOSQUE
+}
+
+enum ProjectSize {
+  P
+  M
+  G
+  GG
+}
+
+enum Deliverable {
+  MODELO_3D
+  PLANTA
+  DESCRITIVO
+  VIDEO
+}
+
+enum FunnelStage {
+  FOLLOW
+  PROPOSTA_APROVADA
+  AG_PAGAMENTO_UNICO
+  AG_PAGAMENTO_RISCO
+  FINALIZADO
+  ENTREGUE
+  AJUSTE
+  NAO_INICIADA
+}
+
+enum ProposalStatus {
+  ENVIAR_PROPOSTA
+  PROPOSTA_APROVADA
+  PROPOSTA_REPROVADA
+  AJUSTE_SEM_CUSTO
+}
+
+enum SaleType {
+  VALOR_UNICO
+  RISCO_SUCCESS
+  AJUSTE
+}
+
+enum JobResult {
+  GANHOU_COM_SUCCESS
+  GANHOU_SEM_SUCCESS
+  PERDEU
+  CANCELADO
+  AGUARDANDO_RETORNO
+}
+
+// Campo original da planilha misturava pagamento e faturamento; separados
+// em dois enums (ver docs/MODELO_DE_DADOS.md, ponto 9).
+enum JobPaymentStatus {
+  PAGO
+  A_PAGAR
+}
+
+enum JobInvoicingStatus {
+  EMITIR_NFE
+  FATURADO_RISCO
+  FATURADO_TOTAL
+  NFE_EMITIDA
+}
+
+enum SimplesAnnex {
+  ANEXO_I
+  ANEXO_II
+  ANEXO_III
+  ANEXO_IV
+  ANEXO_V
+}
+
+// ----------------------------------------------------------------------------
+// Multi-tenant: empresas, usuários e acesso
+// ----------------------------------------------------------------------------
+
+model Company {
+  id         String    @id @default(uuid())
+  name       String
+  tradeName  String? // apelido (ex.: "Ambiens", "Smart", "IGH")
+  cnpj       String    @unique
+  taxRegime  TaxRegime @default(SIMPLES_NACIONAL)
+  isActive   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  userAccess         UserCompanyAccess[]
+  bankAccounts       BankAccount[]
+  costCenters        CostCenter[]
+  clients            Client[]
+  suppliers          Supplier[]
+  employees          Employee[]
+  financialEntries   FinancialEntry[]
+  jobs               Job[]
+  revenueGoals       RevenueGoal[]
+  revenueProjections RevenueProjection[]
+  taxSnapshots       TaxCalculationSnapshot[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  companyAccess  UserCompanyAccess[]
+  createdEntries FinancialEntry[]    @relation("EntryCreatedBy")
+  updatedEntries FinancialEntry[]    @relation("EntryUpdatedBy")
+  createdJobs    Job[]               @relation("JobCreatedBy")
+  transfers      AccountTransfer[]
+
+  @@map("users")
+}
+
+// Papel do usuário É por empresa: um financeiro pode ter acesso à Ambiens,
+// Smart e IGH simultaneamente, cada acesso com seu próprio papel.
+// A "visão consolidada" do grupo é uma agregação de relatório sobre todas as
+// empresas às quais o usuário tem acesso — não existe uma "empresa virtual".
+model UserCompanyAccess {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  role      UserRole
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+  @@map("user_company_access")
+}
+
+// ----------------------------------------------------------------------------
+// Contas bancárias e transferências
+// ----------------------------------------------------------------------------
+
+model BankAccount {
+  id             String          @id @default(uuid())
+  companyId      String
+  name           String
+  type           BankAccountType @default(CHECKING)
+  bankName       String?
+  initialBalance Decimal         @default(0) @db.Decimal(14, 2)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  company           Company          @relation(fields: [companyId], references: [id])
+  financialEntries  FinancialEntry[]
+  transfersOut      AccountTransfer[] @relation("TransferSource")
+  transfersIn       AccountTransfer[] @relation("TransferDestination")
+
+  // saldo atual = initialBalance + recebimentos pagos - pagamentos pagos
+  //             + transferências recebidas - transferências enviadas
+  // calculado via view/consulta, não persistido (evita divergência).
+
+  @@index([companyId])
+  @@map("bank_accounts")
+}
+
+// Suporta transferência entre contas de empresas diferentes do mesmo grupo
+// (intercompany): sourceAccount e destinationAccount podem pertencer a
+// companyId distintos.
+model AccountTransfer {
+  id                    String   @id @default(uuid())
+  date                  DateTime @db.Date
+  amount                Decimal  @db.Decimal(14, 2)
+  sourceAccountId       String
+  destinationAccountId  String
+  description           String?
+  createdByUserId       String
+  createdAt             DateTime @default(now())
+
+  sourceAccount      BankAccount @relation("TransferSource", fields: [sourceAccountId], references: [id])
+  destinationAccount BankAccount @relation("TransferDestination", fields: [destinationAccountId], references: [id])
+  createdBy          User        @relation(fields: [createdByUserId], references: [id])
+
+  @@index([sourceAccountId])
+  @@index([destinationAccountId])
+  @@map("account_transfers")
+}
+
+// ----------------------------------------------------------------------------
+// Plano de contas (compartilhado entre as empresas do grupo) e centros de
+// custo (por empresa)
+// ----------------------------------------------------------------------------
+
+model ChartOfAccount {
+  id        String            @id @default(uuid())
+  parentId  String?
+  name      String
+  group     ChartAccountGroup
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  parent             ChartOfAccount?      @relation("ChartHierarchy", fields: [parentId], references: [id])
+  children           ChartOfAccount[]     @relation("ChartHierarchy")
+  financialEntries   FinancialEntry[]
+  revenueProjections RevenueProjection[]
+
+  @@map("chart_of_accounts")
+}
+
+model CostCenter {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company          Company          @relation(fields: [companyId], references: [id])
+  financialEntries FinancialEntry[]
+
+  @@unique([companyId, name])
+  @@map("cost_centers")
+}
+
+// ----------------------------------------------------------------------------
+// Clientes, fornecedores e colaboradores
+// ----------------------------------------------------------------------------
+
+model Client {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  document  String? // CPF/CNPJ
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company          Company          @relation(fields: [companyId], references: [id])
+  financialEntries FinancialEntry[]
+  jobs             Job[]
+
+  @@unique([companyId, document])
+  @@index([companyId])
+  @@map("clients")
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  document  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company          Company          @relation(fields: [companyId], references: [id])
+  financialEntries FinancialEntry[]
+
+  @@unique([companyId, document])
+  @@index([companyId])
+  @@map("suppliers")
+}
+
+model Employee {
+  id               String         @id @default(uuid())
+  companyId        String
+  name             String
+  email            String?
+  phone            String?
+  document         String?
+  pixKey           String?
+  role             String // ex.: Projetista, Arquiteta, Financeiro
+  baseSalary       Decimal?       @db.Decimal(14, 2)
+  commissionType   CommissionType @default(PERCENTAGE)
+  commissionValue  Decimal?       @db.Decimal(14, 2)
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  company                 Company                   @relation(fields: [companyId], references: [id])
+  jobs                    Job[]
+  salaryReviewAssessments SalaryReviewAssessment[]
+  salaryAdjustments       SalaryAdjustment[]
+
+  // contagem de jobs / "success" fechados NÃO é persistida — calculada por
+  // consulta a partir de Job.responsibleEmployeeId + Job.result, para nunca
+  // ficar desatualizada.
+
+  @@index([companyId])
+  @@map("employees")
+}
+
+// ----------------------------------------------------------------------------
+// Lançamentos financeiros (núcleo do sistema)
+// ----------------------------------------------------------------------------
+
+model FinancialEntry {
+  id             String   @id @default(uuid())
+  companyId      String
+  clientId       String?
+  supplierId     String?
+  costCenterId   String
+  chartOfAccountId String
+  bankAccountId  String? // conta de pagamento/recebimento (necessária p/ relatório de saldo por conta)
+  jobId          String? // preenchido quando o lançamento nasce de um job aprovado
+
+  nature      EntryNature // derivado de chartOfAccount.group ao salvar
+  invoiceNumber String?
+  description String
+  amount      Decimal     @db.Decimal(14, 2)
+
+  // Parcelamento: quando installmentTotal > 1, o backend gera N linhas
+  // "irmãs" (não pai/filho) compartilhando installmentGroupId, com
+  // vencimentos mensais sequenciais a partir de dueDate.
+  installmentGroupId String?
+  installmentNumber  Int     @default(1)
+  installmentTotal   Int     @default(1)
+
+  entryDate   DateTime  @db.Date // competência / criação
+  dueDate     DateTime  @db.Date
+  paymentDate DateTime? @db.Date
+
+  status   EntryStatus @default(PENDING) // PAID quando paymentDate é preenchida; "Atrasado" é calculado em consulta
+  situacao String? // observações livres complementares ao status
+
+  // derivados de entryDate / dueDate, mantidos pela camada de serviço para
+  // facilitar relatórios por competência x caixa sem recalcular em toda query
+  competenceMonth Int
+  competenceYear  Int
+  dueMonth        Int
+  dueYear         Int
+
+  createdByUserId String
+  updatedByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company        Company        @relation(fields: [companyId], references: [id])
+  client         Client?        @relation(fields: [clientId], references: [id])
+  supplier       Supplier?      @relation(fields: [supplierId], references: [id])
+  costCenter     CostCenter     @relation(fields: [costCenterId], references: [id])
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+  bankAccount    BankAccount?   @relation(fields: [bankAccountId], references: [id])
+  job            Job?           @relation(fields: [jobId], references: [id])
+  createdBy      User           @relation("EntryCreatedBy", fields: [createdByUserId], references: [id])
+  updatedBy      User?          @relation("EntryUpdatedBy", fields: [updatedByUserId], references: [id])
+
+  @@index([companyId, dueDate])
+  @@index([companyId, status])
+  @@index([companyId, competenceYear, competenceMonth])
+  @@index([jobId])
+  @@index([installmentGroupId])
+  @@map("financial_entries")
+}
+
+// ----------------------------------------------------------------------------
+// Jobs / Projetos (pipeline comercial + execução)
+// ----------------------------------------------------------------------------
+
+model Job {
+  id           String   @id @default(uuid())
+  companyId    String
+  name         String
+  agency       String?
+  clientId     String?
+  brand        String?
+  contactName  String?
+
+  entryDate         DateTime? @db.Date
+  proposalEntryDate DateTime? @db.Date
+  eventDate         DateTime? @db.Date
+
+  estimatedBudget   Decimal?           @db.Decimal(14, 2)
+  type              JobType            @default(JOB)
+  service           ServiceType[] // multi-seleção (Criação, Alteração, Executivo, Vídeo, combinações)
+  competitionStatus CompetitionStatus  @default(CONCORRENCIA)
+  temperature       Temperature        @default(MORNO)
+  projectType       ProjectType        @default(REGULAR)
+  product           ProductType?
+  eventType         EventType?
+  projectSize       ProjectSize?
+  location          String?
+  segment           String?
+  deliverables      Deliverable[] // multi-seleção (3D, Planta, Descritivo, Vídeo)
+
+  funnelStage     FunnelStage     @default(FOLLOW)
+  proposalStatus  ProposalStatus  @default(ENVIAR_PROPOSTA)
+  saleType        SaleType?
+  result          JobResult       @default(AGUARDANDO_RETORNO)
+
+  closedValue          Decimal? @db.Decimal(14, 2)
+  riskValue            Decimal? @db.Decimal(14, 2)
+  successValue         Decimal? @db.Decimal(14, 2)
+  calculatedCommission Decimal? @db.Decimal(14, 2)
+
+  // campo original da planilha ("Situação de pagamento e de faturamento")
+  // misturava dois conceitos; separados abaixo (ver docs/MODELO_DE_DADOS.md).
+  paymentStatus   JobPaymentStatus    @default(A_PAGAR)
+  invoicingStatus JobInvoicingStatus?
+
+  responsibleEmployeeId String?
+
+  createdByUserId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company             Company          @relation(fields: [companyId], references: [id])
+  client              Client?          @relation(fields: [clientId], references: [id])
+  responsibleEmployee Employee?        @relation(fields: [responsibleEmployeeId], references: [id])
+  createdBy           User             @relation("JobCreatedBy", fields: [createdByUserId], references: [id])
+  financialEntries    FinancialEntry[] // receitas e custos diretos vinculados ao job (rentabilidade)
+
+  @@index([companyId, funnelStage])
+  @@index([responsibleEmployeeId])
+  @@map("jobs")
+}
+
+// ----------------------------------------------------------------------------
+// Metas e projeções
+// ----------------------------------------------------------------------------
+
+model RevenueGoal {
+  id           String   @id @default(uuid())
+  companyId    String
+  year         Int
+  month        Int
+  targetAmount Decimal  @db.Decimal(14, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, year, month])
+  @@map("revenue_goals")
+}
+
+model RevenueProjection {
+  id               String   @id @default(uuid())
+  companyId        String
+  chartOfAccountId String
+  year             Int
+  month            Int
+  projectedAmount  Decimal  @db.Decimal(14, 2)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company        Company        @relation(fields: [companyId], references: [id])
+  chartOfAccount ChartOfAccount @relation(fields: [chartOfAccountId], references: [id])
+
+  @@unique([companyId, chartOfAccountId, year, month])
+  @@map("revenue_projections")
+}
+
+// ----------------------------------------------------------------------------
+// Simples Nacional
+// ----------------------------------------------------------------------------
+
+// Tabelas do Simples mudam por lei de tempos em tempos, por isso cada faixa
+// tem effectiveFrom — permite manter histórico e calcular corretamente
+// competências passadas mesmo após uma tabela nova ser cadastrada.
+model SimplesNacionalBracket {
+  id            String       @id @default(uuid())
+  annex         SimplesAnnex
+  bracketOrder  Int
+  revenueFrom   Decimal      @db.Decimal(14, 2)
+  revenueTo     Decimal      @db.Decimal(14, 2)
+  nominalRate   Decimal      @db.Decimal(6, 4) // ex.: 0.0600 = 6%
+  deduction     Decimal      @db.Decimal(14, 2)
+  effectiveFrom DateTime     @db.Date
+  createdAt     DateTime     @default(now())
+
+  @@unique([annex, bracketOrder, effectiveFrom])
+  @@map("simples_nacional_brackets")
+}
+
+// Snapshot mensal do cálculo (auditoria/histórico); pode ser recalculado a
+// qualquer momento a partir de FinancialEntry + SimplesNacionalBracket.
+model TaxCalculationSnapshot {
+  id            String   @id @default(uuid())
+  companyId     String
+  year          Int
+  month         Int
+  rbt12         Decimal  @db.Decimal(14, 2)
+  nominalRate   Decimal  @db.Decimal(6, 4)
+  effectiveRate Decimal  @db.Decimal(6, 4)
+  dasValue      Decimal  @db.Decimal(14, 2)
+  calculatedAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, year, month])
+  @@map("tax_calculation_snapshots")
+}
+
+// ----------------------------------------------------------------------------
+// Reajuste salarial
+// ----------------------------------------------------------------------------
+
+model SalaryReviewCriteria {
+  id       String  @id @default(uuid())
+  name     String // ex.: Viabilidade financeira, Desempenho, Risco de perda, Alinhamento com o mercado
+  weight   Decimal @db.Decimal(5, 2) // peso percentual do critério
+  isActive Boolean @default(true)
+
+  scores SalaryReviewScore[]
+
+  @@map("salary_review_criteria")
+}
+
+model SalaryReviewAssessment {
+  id             String   @id @default(uuid())
+  employeeId     String
+  assessmentDate DateTime @db.Date
+  notes          String?
+  finalScore     Decimal? @db.Decimal(5, 2) // soma ponderada, calculada e cacheada ao salvar
+  createdAt      DateTime @default(now())
+
+  employee         Employee          @relation(fields: [employeeId], references: [id])
+  scores           SalaryReviewScore[]
+  salaryAdjustment SalaryAdjustment?
+
+  @@map("salary_review_assessments")
+}
+
+model SalaryReviewScore {
+  id           String  @id @default(uuid())
+  assessmentId String
+  criteriaId   String
+  score        Decimal @db.Decimal(4, 2) // nota 0-10
+
+  assessment SalaryReviewAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  criteria   SalaryReviewCriteria   @relation(fields: [criteriaId], references: [id])
+
+  @@unique([assessmentId, criteriaId])
+  @@map("salary_review_scores")
+}
+
+model SalaryAdjustment {
+  id                   String    @id @default(uuid())
+  employeeId           String
+  assessmentId         String?   @unique
+  referenceDate        DateTime  @db.Date
+  indexUsed            Decimal   @db.Decimal(6, 4) // índice configurável (ex.: INPC/IPCA do período), em %
+  previousSalary       Decimal   @db.Decimal(14, 2)
+  adjustmentPercentage Decimal   @db.Decimal(6, 4)
+  newSalary            Decimal   @db.Decimal(14, 2)
+  appliedAt            DateTime?
+  createdAt            DateTime  @default(now())
+
+  employee   Employee                @relation(fields: [employeeId], references: [id])
+  assessment SalaryReviewAssessment? @relation(fields: [assessmentId], references: [id])
+
+  @@map("salary_adjustments")
+}
+
+// ----------------------------------------------------------------------------
+// Importação de dados históricos (planilha)
+// ----------------------------------------------------------------------------
+
+model ImportBatch {
+  id               String    @id @default(uuid())
+  fileName         String
+  sourceSheet      String
+  importedByUserId String
+  status           String    @default("PENDING") // PENDING | RUNNING | SUCCESS | FAILED
+  rowsProcessed    Int       @default(0)
+  rowsFailed       Int       @default(0)
+  errorLog         String?
+  startedAt        DateTime  @default(now())
+  finishedAt       DateTime?
+
+  @@map("import_batches")
+}
