@@ -111,8 +111,17 @@ cd backend
 npm test
 ```
 
-Cobrem as regras de cálculo: parcelamento (divisão em centavos, rolagem de
-mês), status automático (Pago/A pagar/Atrasado) e cálculo de comissão.
+Testes unitários das funções puras (parcelamento — divisão em centavos e
+rolagem de mês —, status automático Pago/A pagar/Atrasado, comissão,
+Simples Nacional) e testes de integração ponta a ponta contra um Postgres
+real dos serviços com regra de negócio: relatórios (DRE, fluxo de caixa,
+saldo bancário, rentabilidade por job, contas a pagar, ranking de
+comissões), lançamentos financeiros (parcelamento e isolamento
+multi-tenant), jobs (cálculo/recálculo de comissão, geração de lançamento)
+e Simples Nacional (RBT12, DAS, versionamento de faixas). Requer o banco
+local configurado em `DATABASE_URL` (mesmo do `npm run start:dev`) — cada
+suíte cria e limpa sua própria empresa de teste, então é seguro rodar
+junto com dados reais/de desenvolvimento já existentes no banco.
 
 ### Importação da planilha histórica
 
