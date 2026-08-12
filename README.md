@@ -18,14 +18,20 @@ Postgres real:
   centros de custo, contas bancárias, transferências intercompany),
   lançamentos financeiros (parcelamento automático, status Pago/A
   pagar/Atrasado calculado em consulta), jobs/projetos (pipeline comercial,
-  comissão automática, geração de lançamento a partir de job aprovado).
+  comissão automática, geração de lançamento a partir de job aprovado),
+  relatórios (DRE, fluxo de caixa, saldo bancário, rentabilidade por job,
+  clientes/fornecedores, contas a pagar, ranking de comissões — com
+  exportação CSV), metas/projeções e cálculo de Simples Nacional.
 - **Frontend (React)**: login, layout com seletor de empresa/visão por
-  papel, dashboard com dados reais da API. Telas de cadastro/lançamentos/
-  jobs/relatórios ainda em construção (aparecem como placeholder no menu).
+  papel, dashboards (geral, projetos, contas a pagar, financeiro por
+  empresa/consolidado), telas de cadastro, lançamentos financeiros e
+  pipeline de jobs (kanban).
+- **Importação de dados históricos** — script que importa a planilha Excel
+  legada para o banco novo (ver [`docs/IMPORTACAO_PLANILHA.md`](docs/IMPORTACAO_PLANILHA.md)).
 
-Ainda faltam: relatórios (DRE, fluxo de caixa etc.), metas/projeções/Simples
-Nacional, dashboards completos, telas de CRUD no frontend, e o script de
-importação da planilha histórica.
+Ainda falta: cobertura mais ampla de testes automatizados das regras de
+cálculo, exportação em Excel/PDF (hoje só CSV), e telas de frontend para
+metas/projeções.
 
 ## Estrutura do projeto
 
@@ -108,6 +114,20 @@ npm test
 Cobrem as regras de cálculo: parcelamento (divisão em centavos, rolagem de
 mês), status automático (Pago/A pagar/Atrasado) e cálculo de comissão.
 
+### Importação da planilha histórica
+
+```bash
+cd backend
+npx ts-node scripts/import-legacy-spreadsheet.ts --file /caminho/CONTROLE_FINANCEIRO_AMBIENS.xlsm --dry-run
+```
+
+Sempre rode com `--dry-run` primeiro e revise o relatório antes de rodar sem
+a flag para gravar de verdade. Requer o banco migrado e com o seed já
+rodado. Ver [`docs/IMPORTACAO_PLANILHA.md`](docs/IMPORTACAO_PLANILHA.md) para
+o mapeamento completo de cada aba/coluna e as decisões de aproximação
+tomadas para dados sem equivalente exato no schema. **O arquivo real da
+planilha nunca deve ser commitado no repositório.**
+
 ## Como adicionar uma nova empresa, categoria ou centro de custo
 
 - **Empresa**: hoje é feito via `backend/prisma/seed.ts` ou diretamente no
@@ -121,10 +141,7 @@ mês), status automático (Pago/A pagar/Atrasado) e cálculo de comissão.
 
 ## Próximos passos
 
-1. Relatórios (DRE, fluxo de caixa, saldo bancário, clientes, fornecedores,
-   contas a pagar, ranking de comissões).
-2. Metas, projeções e cálculo de Simples Nacional.
-3. Telas de frontend para os CRUDs base e lançamentos financeiros.
-4. Frontend do pipeline de jobs (kanban) e relatórios.
-5. Dashboards completos.
-6. Script de importação dos dados históricos da planilha.
+1. Ampliar a cobertura de testes automatizados das regras de cálculo.
+2. Exportação de relatórios em Excel/PDF (hoje só CSV).
+3. Telas de frontend para metas e projeções (hoje só via API).
+4. Página de relatórios de navegação livre no frontend.
