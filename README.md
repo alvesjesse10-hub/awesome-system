@@ -36,14 +36,27 @@ cd backend
 cp .env.example .env
 npm install
 npm run prisma:migrate:dev
+npm run prisma:seed
 ```
 
 Adminer fica disponível em `http://localhost:8081` (sistema: PostgreSQL,
 servidor: `postgres`, usuário/senha: `postgres`, banco:
 `ambiens_financeiro`) para inspecionar o schema aplicado.
 
+O seed cria:
+- As 3 empresas do grupo (Ambiens, Smart, IGH) com um centro de custo
+  "Geral" cada — apenas ponto de partida, edite/renomeie como quiser.
+- O plano de contas padrão completo (7 grupos, ~30 subcategorias) extraído
+  da planilha atual.
+- A tabela de faixas do Simples Nacional — **Anexo III como placeholder**
+  (ver `docs/MODELO_DE_DADOS.md`, ponto 4 — ainda precisa confirmar o anexo
+  correto).
+- Um usuário administrador: `admin@ambiens.com.br` / senha temporária
+  `TrocarSenha123!` (trocar no primeiro acesso, quando o módulo de auth
+  estiver pronto).
+
 O backend (API NestJS) e o frontend (React) ainda serão adicionados nas
-próximas fases, após validação do modelo de dados.
+próximas fases.
 
 ## Próximos passos (após validação do schema)
 
