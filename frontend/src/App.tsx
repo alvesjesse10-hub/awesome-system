@@ -14,9 +14,9 @@ import { CostCentersPage } from '@/pages/cost-centers-page'
 import { BankAccountsPage } from '@/pages/bank-accounts-page'
 import { ChartOfAccountsPage } from '@/pages/chart-of-accounts-page'
 import { FinancialEntriesPage } from '@/pages/financial-entries-page'
+import { JobsPage } from '@/pages/jobs-page'
 
 const comingSoon: { path: string; title: string }[] = [
-  { path: '/jobs', title: 'Jobs / Projetos' },
   { path: '/metas', title: 'Metas e Projeções' },
   { path: '/relatorios', title: 'Relatórios' },
 ]
@@ -32,6 +32,7 @@ export default function App() {
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/lancamentos" element={<FinancialEntriesPage />} />
+                <Route path="/jobs" element={<JobsPage />} />
                 <Route path="/clientes" element={<ClientsPage />} />
                 <Route path="/fornecedores" element={<SuppliersPage />} />
                 <Route path="/colaboradores" element={<EmployeesPage />} />
