@@ -12,6 +12,7 @@ import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { AccountTransfersModule } from './account-transfers/account-transfers.module';
 import { FinancialEntriesModule } from './financial-entries/financial-entries.module';
 import { JobsModule } from './jobs/jobs.module';
+import { ReportsModule } from './reports/reports.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JobsModule } from './jobs/jobs.module';
     AccountTransfersModule,
     FinancialEntriesModule,
     JobsModule,
+    ReportsModule,
   ],
 })
 export class AppModule {}
