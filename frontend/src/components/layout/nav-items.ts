@@ -1,18 +1,24 @@
 import {
+  AlertTriangle,
   Banknote,
   Briefcase,
   Building2,
   LayoutDashboard,
+  Landmark,
   ListTree,
   Receipt,
   Target,
+  TrendingUp,
   Truck,
   Users,
   Wallet,
 } from 'lucide-react'
 
 export const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/', label: 'Dashboard Geral', icon: LayoutDashboard, end: true },
+  { to: '/dashboard/projetos', label: 'Dashboard Projetos', icon: TrendingUp },
+  { to: '/dashboard/contas-a-pagar', label: 'Dashboard Contas a Pagar', icon: AlertTriangle },
+  { to: '/dashboard/financeiro', label: 'Dashboard Financeiro', icon: Landmark },
   { to: '/lancamentos', label: 'Lançamentos', icon: Receipt },
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
   { to: '/clientes', label: 'Clientes', icon: Users },

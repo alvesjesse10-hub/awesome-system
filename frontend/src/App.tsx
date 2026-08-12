@@ -15,6 +15,9 @@ import { BankAccountsPage } from '@/pages/bank-accounts-page'
 import { ChartOfAccountsPage } from '@/pages/chart-of-accounts-page'
 import { FinancialEntriesPage } from '@/pages/financial-entries-page'
 import { JobsPage } from '@/pages/jobs-page'
+import { ProjectsDashboardPage } from '@/pages/projects-dashboard-page'
+import { AccountsPayableDashboardPage } from '@/pages/accounts-payable-dashboard-page'
+import { FinancialDashboardPage } from '@/pages/financial-dashboard-page'
 
 const comingSoon: { path: string; title: string }[] = [
   { path: '/metas', title: 'Metas e Projeções' },
@@ -31,6 +34,9 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DashboardPage />} />
+                <Route path="/dashboard/projetos" element={<ProjectsDashboardPage />} />
+                <Route path="/dashboard/contas-a-pagar" element={<AccountsPayableDashboardPage />} />
+                <Route path="/dashboard/financeiro" element={<FinancialDashboardPage />} />
                 <Route path="/lancamentos" element={<FinancialEntriesPage />} />
                 <Route path="/jobs" element={<JobsPage />} />
                 <Route path="/clientes" element={<ClientsPage />} />
