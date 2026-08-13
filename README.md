@@ -26,15 +26,13 @@ Postgres real:
 - **Frontend (React)**: login, layout com seletor de empresa/visão por
   papel, dashboards (geral, projetos, contas a pagar, financeiro por
   empresa/consolidado) com botões de exportação nos relatórios exibidos,
-  telas de cadastro, lançamentos financeiros, pipeline de jobs (kanban) e
-  metas/projeções de faturamento (com gráfico de comparação x realizado).
+  página de Relatórios com navegação livre entre os 8 relatórios do
+  sistema (visão empresa/consolidado, filtros de ano/mês/natureza e
+  exportação CSV/Excel/PDF em todos), telas de cadastro, lançamentos
+  financeiros, pipeline de jobs (kanban) e metas/projeções de faturamento
+  (com gráfico de comparação x realizado).
 - **Importação de dados históricos** — script que importa a planilha Excel
   legada para o banco novo (ver [`docs/IMPORTACAO_PLANILHA.md`](docs/IMPORTACAO_PLANILHA.md)).
-
-Ainda falta uma página de relatórios de navegação livre no frontend (hoje
-cada relatório só aparece dentro dos dashboards que já o exibem — os
-relatórios sem tela própria, como rentabilidade por job, clientes/
-fornecedores e ranking de comissões, ainda só são acessíveis via API).
 
 ## Estrutura do projeto
 
@@ -153,7 +151,4 @@ planilha nunca deve ser commitado no repositório.**
 
 ## Próximos passos
 
-1. Página de relatórios de navegação livre no frontend (dá acesso a
-   rentabilidade por job, clientes/fornecedores e ranking de comissões,
-   que hoje só têm endpoint, sem tela).
-2. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
+1. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
