@@ -16,6 +16,8 @@ interface ResourceFormDialogProps {
   onSubmit: (values: Record<string, unknown>) => Promise<void>
   isSubmitting: boolean
   errorMessage?: string | null
+  /** Quando true, campos com `disabledOnEdit` ficam travados e são omitidos do payload enviado. */
+  isEditing?: boolean
 }
 
 export function ResourceFormDialog({
@@ -27,6 +29,7 @@ export function ResourceFormDialog({
   onSubmit,
   isSubmitting,
   errorMessage,
+  isEditing = false,
 }: ResourceFormDialogProps) {
   const { register, handleSubmit, reset } = useForm({ defaultValues })
 
@@ -50,15 +53,20 @@ export function ResourceFormDialog({
             // id/companyId/createdAt vindos do item em edição), não só os
             // campos deste formulário — o backend usa forbidNonWhitelisted
             // e rejeitaria com 400. Reconstrói só com os campos declarados
-            // em `fields`, normalizando '' e NaN para undefined.
+            // em `fields`, normalizando '' e NaN para undefined. Campos
+            // `disabledOnEdit` são omitidos ao editar (alguns recursos, como
+            // Metas/Projeções, não aceitam mudar ano/mês/categoria depois de
+            // criados — só o valor).
             const sanitized = Object.fromEntries(
-              fields.map((field) => {
-                const value = (values as Record<string, unknown>)[field.name]
-                if (value === '' || (typeof value === 'number' && Number.isNaN(value))) {
-                  return [field.name, undefined]
-                }
-                return [field.name, value]
-              }),
+              fields
+                .filter((field) => !(isEditing && field.disabledOnEdit))
+                .map((field) => {
+                  const value = (values as Record<string, unknown>)[field.name]
+                  if (value === '' || (typeof value === 'number' && Number.isNaN(value))) {
+                    return [field.name, undefined]
+                  }
+                  return [field.name, value]
+                }),
             )
             await onSubmit(sanitized)
           })}
@@ -70,7 +78,12 @@ export function ResourceFormDialog({
                 {field.required && <span className="text-destructive"> *</span>}
               </Label>
               {field.type === 'select' ? (
-                <Select id={field.name} required={field.required} {...register(field.name, { required: field.required })}>
+                <Select
+                  id={field.name}
+                  required={field.required}
+                  disabled={isEditing && field.disabledOnEdit}
+                  {...register(field.name, { required: field.required, valueAsNumber: field.numeric })}
+                >
                   {!field.required && <option value="">—</option>}
                   {field.options?.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -85,9 +98,10 @@ export function ResourceFormDialog({
                   step={field.step}
                   placeholder={field.placeholder}
                   required={field.required}
+                  disabled={isEditing && field.disabledOnEdit}
                   {...register(field.name, {
                     required: field.required,
-                    valueAsNumber: field.type === 'number',
+                    valueAsNumber: field.type === 'number' || field.numeric,
                   })}
                 />
               )}

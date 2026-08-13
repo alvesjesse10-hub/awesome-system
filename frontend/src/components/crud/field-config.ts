@@ -13,6 +13,10 @@ export interface FieldConfig {
   options?: SelectOption[]
   step?: string
   placeholder?: string
+  /** Força conversão para número no submit (react-hook-form valueAsNumber) mesmo em campos `select` — ex.: mês (1-12). */
+  numeric?: boolean
+  /** Campo só editável na criação (ex.: ano/mês que definem a identidade do registro) — fica desabilitado e é omitido do payload ao editar. */
+  disabledOnEdit?: boolean
 }
 
 export interface ColumnConfig<T> {

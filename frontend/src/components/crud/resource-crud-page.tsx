@@ -147,6 +147,7 @@ export function ResourceCrudPage<T extends { id: string }>({
         onSubmit={handleSubmit}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
         errorMessage={errorMessage}
+        isEditing={!!editing}
       />
     </div>
   )

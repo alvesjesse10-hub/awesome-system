@@ -18,11 +18,9 @@ import { JobsPage } from '@/pages/jobs-page'
 import { ProjectsDashboardPage } from '@/pages/projects-dashboard-page'
 import { AccountsPayableDashboardPage } from '@/pages/accounts-payable-dashboard-page'
 import { FinancialDashboardPage } from '@/pages/financial-dashboard-page'
+import { RevenuePlanningPage } from '@/pages/revenue-planning-page'
 
-const comingSoon: { path: string; title: string }[] = [
-  { path: '/metas', title: 'Metas e Projeções' },
-  { path: '/relatorios', title: 'Relatórios' },
-]
+const comingSoon: { path: string; title: string }[] = [{ path: '/relatorios', title: 'Relatórios' }]
 
 export default function App() {
   return (
@@ -45,6 +43,7 @@ export default function App() {
                 <Route path="/contas-bancarias" element={<BankAccountsPage />} />
                 <Route path="/plano-de-contas" element={<ChartOfAccountsPage />} />
                 <Route path="/centros-de-custo" element={<CostCentersPage />} />
+                <Route path="/metas" element={<RevenuePlanningPage />} />
                 {comingSoon.map((route) => (
                   <Route key={route.path} path={route.path} element={<ComingSoonPage title={route.title} />} />
                 ))}

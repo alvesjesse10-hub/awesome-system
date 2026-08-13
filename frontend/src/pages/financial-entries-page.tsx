@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { apiClient } from '@/lib/api-client'
 import { useAuth } from '@/context/auth-context'
 import { useCompanyList } from '@/hooks/use-company-resource'
+import { useChartOfAccountLeaves } from '@/hooks/use-chart-of-accounts'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -39,16 +40,6 @@ function extractErrorMessage(error: unknown): string {
     if (typeof message === 'string') return message
   }
   return 'Ocorreu um erro inesperado.'
-}
-
-function useChartOfAccountLeaves() {
-  return useQuery({
-    queryKey: ['chart-of-accounts', 'leaves'],
-    queryFn: async () => {
-      const { data } = await apiClient.get<ChartOfAccount[]>('/chart-of-accounts')
-      return data.filter((account) => account.parentId !== null)
-    },
-  })
 }
 
 interface EntryFilters {

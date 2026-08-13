@@ -24,7 +24,6 @@ export function useCompanyList<T>(resource: string) {
 }
 
 export function useCompanyCreate<TInput, TOutput = unknown>(resource: string) {
-  const { activeCompany } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -33,13 +32,17 @@ export function useCompanyCreate<TInput, TOutput = unknown>(resource: string) {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [resource, 'list', activeCompany?.id] })
+      // Invalida por PREFIXO ([resource], não [resource, 'list', ...]) para
+      // pegar junto qualquer query irmã do mesmo recurso com uma queryKey
+      // diferente (ex.: /revenue-goals/comparison, que não é uma 'list') —
+      // sem isso, telas com gráfico de comparação ficam com dado velho até
+      // um refresh manual.
+      queryClient.invalidateQueries({ queryKey: [resource] })
     },
   })
 }
 
 export function useCompanyUpdate<TInput, TOutput = unknown>(resource: string) {
-  const { activeCompany } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -48,13 +51,17 @@ export function useCompanyUpdate<TInput, TOutput = unknown>(resource: string) {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [resource, 'list', activeCompany?.id] })
+      // Invalida por PREFIXO ([resource], não [resource, 'list', ...]) para
+      // pegar junto qualquer query irmã do mesmo recurso com uma queryKey
+      // diferente (ex.: /revenue-goals/comparison, que não é uma 'list') —
+      // sem isso, telas com gráfico de comparação ficam com dado velho até
+      // um refresh manual.
+      queryClient.invalidateQueries({ queryKey: [resource] })
     },
   })
 }
 
 export function useCompanyDelete(resource: string) {
-  const { activeCompany } = useAuth()
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -62,7 +69,12 @@ export function useCompanyDelete(resource: string) {
       await apiClient.delete(`/${resource}/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [resource, 'list', activeCompany?.id] })
+      // Invalida por PREFIXO ([resource], não [resource, 'list', ...]) para
+      // pegar junto qualquer query irmã do mesmo recurso com uma queryKey
+      // diferente (ex.: /revenue-goals/comparison, que não é uma 'list') —
+      // sem isso, telas com gráfico de comparação ficam com dado velho até
+      // um refresh manual.
+      queryClient.invalidateQueries({ queryKey: [resource] })
     },
   })
 }
