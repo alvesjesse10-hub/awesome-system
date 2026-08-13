@@ -129,13 +129,21 @@ entrada, Data de vencimento, Data de pagamento, Status, situação.
 ### Linhas puladas
 
 Uma linha é pulada (e um aviso é registrado) quando:
-- `Tipo` ou `Centro de custo` está vazio — normalmente linhas de planejamento
-  futuro incompletas (ex.: orçamentos para eventos de 2026/2027 ainda sem centro
-  de custo definido), confirmado inspecionando os dados reais.
+- `Tipo` está vazio.
 - `Valor`, `Data de entrada` ou `Data de vencimento` inválidos/ausentes.
-- O `Centro de custo` não é reconhecido (ver tabela acima).
+- O `Centro de custo` está preenchido mas não é reconhecido (ver tabela acima).
 - A categoria (`Plano de contas` + grupo derivado do `Tipo`) não existe no plano
   de contas, mesmo após a reconciliação da aba Cadastro de contas.
+
+### Linhas sem "Centro de custo"
+
+73 das 2702 linhas reais têm `Tipo` e valores válidos mas não preenchem
+`Centro de custo` — em geral comissões/salários ligados a jobs ainda em
+negociação e receitas orçadas para eventos futuros (2026/2027), confirmado
+inspecionando os dados reais. Em vez de pular essas linhas, o importador as
+atribui à empresa **Ambiens** (empresa "titular" do arquivo), a mesma
+aproximação já usada para "Aplicação Geral"/"Renda Fixa" (ver tabela acima) —
+um aviso é registrado por linha para revisão manual posterior.
 
 ### Natureza, categoria e conta bancária
 
