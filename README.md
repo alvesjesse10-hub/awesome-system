@@ -24,14 +24,15 @@ Postgres real:
   exportação CSV), metas/projeções e cálculo de Simples Nacional.
 - **Frontend (React)**: login, layout com seletor de empresa/visão por
   papel, dashboards (geral, projetos, contas a pagar, financeiro por
-  empresa/consolidado), telas de cadastro, lançamentos financeiros e
-  pipeline de jobs (kanban).
+  empresa/consolidado), telas de cadastro, lançamentos financeiros,
+  pipeline de jobs (kanban) e metas/projeções de faturamento (com gráfico
+  de comparação x realizado).
 - **Importação de dados históricos** — script que importa a planilha Excel
   legada para o banco novo (ver [`docs/IMPORTACAO_PLANILHA.md`](docs/IMPORTACAO_PLANILHA.md)).
 
-Ainda falta: cobertura mais ampla de testes automatizados das regras de
-cálculo, exportação em Excel/PDF (hoje só CSV), e telas de frontend para
-metas/projeções.
+Ainda falta: exportação de relatórios em Excel/PDF (hoje só CSV) e uma
+página de relatórios de navegação livre no frontend (hoje cada relatório
+só aparece dentro dos dashboards).
 
 ## Estrutura do projeto
 
@@ -150,7 +151,6 @@ planilha nunca deve ser commitado no repositório.**
 
 ## Próximos passos
 
-1. Ampliar a cobertura de testes automatizados das regras de cálculo.
-2. Exportação de relatórios em Excel/PDF (hoje só CSV).
-3. Telas de frontend para metas e projeções (hoje só via API).
-4. Página de relatórios de navegação livre no frontend.
+1. Exportação de relatórios em Excel/PDF (hoje só CSV).
+2. Página de relatórios de navegação livre no frontend.
+3. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
