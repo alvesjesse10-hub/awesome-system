@@ -28,12 +28,15 @@ RUN npm run build
 FROM node:20-slim AS runtime
 RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-ENV NODE_ENV=production
 
 COPY backend/package.json backend/package-lock.json ./
 # npm ci completo (não --omit=dev): "prisma" (CLI, usado no start para
 # aplicar migrations) e "ts-node" (usado pelo prisma:seed) são devDependencies.
+# NODE_ENV=production só é setado DEPOIS do install — setar antes faz o npm
+# ci pular devDependencies silenciosamente (mesmo efeito de --omit=dev),
+# quebrando "prisma" e "ts-node".
 RUN npm ci
+ENV NODE_ENV=production
 
 COPY --from=backend-build /app/backend/prisma ./prisma
 RUN npx prisma generate
