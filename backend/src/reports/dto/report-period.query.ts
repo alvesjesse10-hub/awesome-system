@@ -15,6 +15,6 @@ export class ReportPeriodQuery {
   month?: number;
 
   @IsOptional()
-  @IsIn(['csv'])
-  format?: 'csv';
+  @IsIn(['csv', 'xlsx', 'pdf'])
+  format?: 'csv' | 'xlsx' | 'pdf';
 }

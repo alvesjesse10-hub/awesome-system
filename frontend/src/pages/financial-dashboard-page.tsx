@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { StatTile } from '@/components/dashboard/stat-tile'
 import { RevenueExpenseChart } from '@/components/dashboard/revenue-expense-chart'
 import { DreSummaryTable } from '@/components/dashboard/dre-summary-table'
+import { ExportMenu } from '@/components/dashboard/export-menu'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useAuth } from '@/context/auth-context'
 import { useScopedBankBalances, useScopedCashFlow, useScopedDre } from '@/hooks/use-scoped-reports'
@@ -89,8 +90,14 @@ export function FinancialDashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex-row items-center justify-between">
             <CardTitle>DRE resumido — {year}</CardTitle>
+            <ExportMenu
+              path="/reports/dre"
+              params={{ year }}
+              filenameBase={`dre-${year}`}
+              headers={{ 'X-Company-Id': scopeId ?? '' }}
+            />
           </CardHeader>
           <CardContent>
             {dre.isLoading ? (
@@ -103,8 +110,14 @@ export function FinancialDashboardPage() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between">
           <CardTitle>Saldo por conta bancária</CardTitle>
+          <ExportMenu
+            path="/reports/bank-balances"
+            params={{}}
+            filenameBase="saldo-bancario"
+            headers={{ 'X-Company-Id': scopeId ?? '' }}
+          />
         </CardHeader>
         <CardContent>
           {bankBalances.isLoading ? (

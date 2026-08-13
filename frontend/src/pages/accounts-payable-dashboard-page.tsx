@@ -4,6 +4,7 @@ import { Select } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { StatTile } from '@/components/dashboard/stat-tile'
 import { CountBarList } from '@/components/dashboard/count-bar-list'
+import { ExportMenu } from '@/components/dashboard/export-menu'
 import { useAccountsPayable } from '@/hooks/use-reports'
 import { formatCurrency } from '@/lib/utils'
 
@@ -20,7 +21,7 @@ export function AccountsPayableDashboardPage() {
           </h1>
           <p className="text-sm text-muted-foreground">Vencimentos em aberto por prazo, fornecedor e centro de custo</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Label htmlFor="nature-filter" className="text-muted-foreground">
             Visão
           </Label>
@@ -28,6 +29,7 @@ export function AccountsPayableDashboardPage() {
             <option value="EXPENSE">Contas a pagar</option>
             <option value="REVENUE">Contas a receber</option>
           </Select>
+          <ExportMenu path="/reports/accounts-payable" params={{ nature }} filenameBase="contas-a-pagar" />
         </div>
       </div>
 

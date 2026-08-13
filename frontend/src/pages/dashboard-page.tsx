@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatTile } from '@/components/dashboard/stat-tile'
 import { RevenueExpenseChart } from '@/components/dashboard/revenue-expense-chart'
 import { DreSummaryTable } from '@/components/dashboard/dre-summary-table'
+import { ExportMenu } from '@/components/dashboard/export-menu'
 import { useAccountsPayable, useDre, useRevenueGoalComparison, useRevenueProjectionComparison } from '@/hooks/use-reports'
 import { formatCurrency } from '@/lib/utils'
 import { currentMonth, currentYear } from '@/lib/date-labels'
@@ -137,8 +138,9 @@ export function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex-row items-center justify-between">
             <CardTitle>DRE resumido — {year}</CardTitle>
+            <ExportMenu path="/reports/dre" params={{ year }} filenameBase={`dre-${year}`} />
           </CardHeader>
           <CardContent>
             {dre.isLoading ? (
