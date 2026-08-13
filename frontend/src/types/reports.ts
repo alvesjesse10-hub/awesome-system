@@ -61,6 +61,32 @@ export interface AccountsPayableSummary {
   byParty: { id: string; name: string; total: number }[]
 }
 
+export interface JobProfitabilityRow {
+  jobId: string
+  jobName: string
+  clientName: string | null
+  revenue: number
+  directCosts: number
+  commission: number
+  margin: number
+  marginPercent: number
+}
+
+export interface PartyReportRow {
+  id: string
+  name: string
+  months: number[]
+  total: number
+}
+
+export interface CommissionRankingRow {
+  employeeId: string
+  employeeName: string
+  jobsCount: number
+  successCount: number
+  totalCommission: number
+}
+
 export interface RevenueGoalComparisonRow {
   month: number
   target: number
