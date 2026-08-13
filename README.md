@@ -148,7 +148,3 @@ planilha nunca deve ser commitado no repositório.**
   empresas do grupo, não precisa do header `X-Company-Id`.
 - **Centro de custo**: `POST /api/cost-centers` com o header
   `X-Company-Id` da empresa — é específico de cada empresa.
-
-## Próximos passos
-
-1. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
