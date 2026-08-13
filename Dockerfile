@@ -39,6 +39,12 @@ RUN npm ci
 ENV NODE_ENV=production
 
 COPY --from=backend-build /app/backend/prisma ./prisma
+# tsconfig.json precisa estar presente pro "npm run prisma:seed" (ts-node):
+# sem ele, ts-node/Node não sabem que o projeto é CommonJS ("module":
+# "commonjs" no tsconfig) e tentam reinterpretar o script como ESM, quebrando
+# com "Unknown file extension .ts" (ERR_UNKNOWN_FILE_EXTENSION) — reproduzido
+# localmente removendo o tsconfig.json antes de descobrir a causa.
+COPY --from=backend-build /app/backend/tsconfig.json ./tsconfig.json
 RUN npx prisma generate
 
 COPY --from=backend-build /app/backend/dist ./dist
