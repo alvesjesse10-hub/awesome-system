@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { useAuth } from '@/context/auth-context'
 import { CompanySwitcher } from './company-switcher'
 import { navItems } from './nav-items'
+import { PageLoading } from './page-loading'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
@@ -48,7 +50,9 @@ export function AppLayout() {
           </div>
         </header>
         <main className="flex-1 overflow-y-auto bg-muted/20 p-6">
-          <Outlet />
+          <Suspense fallback={<PageLoading />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>
