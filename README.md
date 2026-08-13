@@ -138,6 +138,14 @@ o mapeamento completo de cada aba/coluna e as decisões de aproximação
 tomadas para dados sem equivalente exato no schema. **O arquivo real da
 planilha nunca deve ser commitado no repositório.**
 
+## Deploy
+
+O `Dockerfile` na raiz empacota frontend e backend num único serviço (o Nest
+serve a API e os arquivos estáticos do React no mesmo processo/domínio). Ver
+[`docs/DEPLOY_RAILWAY.md`](docs/DEPLOY_RAILWAY.md) para o passo a passo
+completo de deploy no Railway (banco Postgres gerenciado, variáveis de
+ambiente, domínio público).
+
 ## Como adicionar uma nova empresa, categoria ou centro de custo
 
 - **Empresa**: hoje é feito via `backend/prisma/seed.ts` ou diretamente no
