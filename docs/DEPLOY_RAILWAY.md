@@ -80,6 +80,33 @@ só). Um domínio próprio pode ser configurado na mesma tela.
 - Login com o usuário admin acima deve funcionar e navegar pelo sistema
   normalmente.
 
+## Troubleshooting
+
+**Build Logs mostram `Prisma failed to detect the libssl/openssl version` e o
+deploy falha no Healthcheck logo depois** — a imagem base `node:20-slim`
+(Debian) não vem com OpenSSL instalado por padrão, e o motor do Prisma
+precisa dele para rodar. O `Dockerfile` já instala `openssl` explicitamente
+nos estágios que usam Prisma; se você ver esse erro mesmo assim, confirme que
+está usando a versão mais recente do `Dockerfile` da branch `main` (o
+Railway faz redeploy automático a cada push nela).
+
+**Deploy Logs mostram `Error: Environment variable not found: DATABASE_URL`**
+— a variável não está chegando no serviço da aplicação. Confira em
+**Variables** do serviço (não do Postgres):
+- A variável `DATABASE_URL` existe e o valor é exatamente
+  `${{Postgres.DATABASE_URL}}` (o Railway resolve essa referência e mostra o
+  valor real ao lado quando está correto — se aparecer em branco ou com erro,
+  o nome do serviço Postgres referenciado está errado; confira o nome exato
+  do serviço de banco no seu projeto).
+- Depois de adicionar/corrigir a variável, o Railway redeploya automaticamente
+  — não precisa disparar manualmente.
+
+**Healthcheck falha mas Build e Deploy aparecem "✓" (verdes)** — geralmente
+significa que o processo subiu mas crashou logo em seguida (ou nunca
+respondeu na porta esperada). Veja a aba **Deploy Logs** (não Build Logs) do
+deployment com falha — é lá que aparece o motivo real do processo Node ter
+saído (stack trace, erro do Prisma, etc.), não nos Build Logs.
+
 ## Notas
 
 - O healthcheck do Railway (`railway.toml`) bate em `/api/health`, que é

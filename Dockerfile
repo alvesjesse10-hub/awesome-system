@@ -14,6 +14,9 @@ RUN npm run build
 
 # ---- Backend ----
 FROM node:20-slim AS backend-build
+# node:20-slim (Debian) não vem com OpenSSL — o motor do Prisma precisa dele
+# pra detectar a versão certa do engine, senão cai num binário incompatível.
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app/backend
 COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
@@ -23,6 +26,7 @@ RUN npm run build
 
 # ---- Runtime ----
 FROM node:20-slim AS runtime
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production
 
