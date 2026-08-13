@@ -203,11 +203,22 @@ export async function importLancamentos(ctx: ImportContext, workbook: XLSX.WorkB
     const description = toTrimmedString(row['Descrição']) ?? '(sem descrição)';
     try {
       const tipoRaw = toTrimmedString(row['Tipo']);
-      const centroDeCusto = toTrimmedString(row['Centro de custo']);
-      if (!tipoRaw || !centroDeCusto) {
-        report.warn(`Linha "${description}": Tipo ou Centro de custo ausente — pulei.`);
+      if (!tipoRaw) {
+        report.warn(`Linha "${description}": Tipo ausente — pulei.`);
         report.skipped++;
         continue;
+      }
+
+      // Linhas de comissão/salário ligadas a jobs e algumas receitas
+      // negociadas costumam não preencher "Centro de custo" na planilha
+      // (73 das 2702 linhas reais) — todas têm "Tipo" e valores válidos, só
+      // falta a coluna que amarra a linha a uma empresa. Mesma aproximação
+      // já usada para "Aplicação Geral"/"Renda Fixa" em company-resolution.ts:
+      // caem em Ambiens (empresa "titular" do arquivo), sinalizado no relatório.
+      const centroDeCustoRaw = toTrimmedString(row['Centro de custo']);
+      const centroDeCusto = centroDeCustoRaw ?? 'Ambiens';
+      if (!centroDeCustoRaw) {
+        report.warn(`Linha "${description}": Centro de custo ausente na planilha; atribuída a Ambiens por padrão (revisar depois).`);
       }
 
       const amount = toNumber(row['Valor']);
