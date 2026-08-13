@@ -20,19 +20,21 @@ Postgres real:
   pagar/Atrasado calculado em consulta), jobs/projetos (pipeline comercial,
   comissão automática, geração de lançamento a partir de job aprovado),
   relatórios (DRE, fluxo de caixa, saldo bancário, rentabilidade por job,
-  clientes/fornecedores, contas a pagar, ranking de comissões — com
-  exportação CSV), metas/projeções e cálculo de Simples Nacional.
+  clientes/fornecedores, contas a pagar, ranking de comissões — todos com
+  exportação em CSV, Excel e PDF), metas/projeções e cálculo de Simples
+  Nacional.
 - **Frontend (React)**: login, layout com seletor de empresa/visão por
   papel, dashboards (geral, projetos, contas a pagar, financeiro por
-  empresa/consolidado), telas de cadastro, lançamentos financeiros,
-  pipeline de jobs (kanban) e metas/projeções de faturamento (com gráfico
-  de comparação x realizado).
+  empresa/consolidado) com botões de exportação nos relatórios exibidos,
+  telas de cadastro, lançamentos financeiros, pipeline de jobs (kanban) e
+  metas/projeções de faturamento (com gráfico de comparação x realizado).
 - **Importação de dados históricos** — script que importa a planilha Excel
   legada para o banco novo (ver [`docs/IMPORTACAO_PLANILHA.md`](docs/IMPORTACAO_PLANILHA.md)).
 
-Ainda falta: exportação de relatórios em Excel/PDF (hoje só CSV) e uma
-página de relatórios de navegação livre no frontend (hoje cada relatório
-só aparece dentro dos dashboards).
+Ainda falta uma página de relatórios de navegação livre no frontend (hoje
+cada relatório só aparece dentro dos dashboards que já o exibem — os
+relatórios sem tela própria, como rentabilidade por job, clientes/
+fornecedores e ranking de comissões, ainda só são acessíveis via API).
 
 ## Estrutura do projeto
 
@@ -151,6 +153,7 @@ planilha nunca deve ser commitado no repositório.**
 
 ## Próximos passos
 
-1. Exportação de relatórios em Excel/PDF (hoje só CSV).
-2. Página de relatórios de navegação livre no frontend.
-3. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
+1. Página de relatórios de navegação livre no frontend (dá acesso a
+   rentabilidade por job, clientes/fornecedores e ranking de comissões,
+   que hoje só têm endpoint, sem tela).
+2. Code-splitting do bundle do frontend (build avisa de chunk > 500kB).
