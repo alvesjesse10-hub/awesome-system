@@ -12,6 +12,7 @@ export interface SiteContent {
     services: string;
     howItWorks: string;
     about: string;
+    blog: string;
     contact: string;
     cta: string;
     switchLabel: string;
@@ -73,5 +74,12 @@ export interface SiteContent {
     lastUpdated: string;
     intro: string;
     sections: { heading: string; body: string }[];
+  };
+  blog: {
+    title: string;
+    subtitle: string;
+    empty: string;
+    backToList: string;
+    minutesRead: string;
   };
 }

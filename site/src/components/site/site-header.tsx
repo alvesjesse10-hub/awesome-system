@@ -16,15 +16,18 @@ export function SiteHeader({ content }: { content: SiteContent }) {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-navy-700 md:flex">
-          <a href="#services" className="transition hover:text-navy-950">
+          <a href={`/${market}#services`} className="transition hover:text-navy-950">
             {nav.services}
           </a>
-          <a href="#how-it-works" className="transition hover:text-navy-950">
+          <a href={`/${market}#how-it-works`} className="transition hover:text-navy-950">
             {nav.howItWorks}
           </a>
-          <a href="#about" className="transition hover:text-navy-950">
+          <a href={`/${market}#about`} className="transition hover:text-navy-950">
             {nav.about}
           </a>
+          <Link href={`/${market}/blog`} className="transition hover:text-navy-950">
+            {nav.blog}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -35,7 +38,7 @@ export function SiteHeader({ content }: { content: SiteContent }) {
             {nav.switchLabel}
           </Link>
           <a
-            href="#contact"
+            href={`/${market}#contact`}
             className="inline-block rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-navy-950 shadow-sm transition hover:bg-amber-400 sm:px-4 sm:py-2"
           >
             {nav.cta}

@@ -13,6 +13,7 @@ export const us: SiteContent = {
     services: "Services",
     howItWorks: "How it works",
     about: "About",
+    blog: "Blog",
     contact: "Contact",
     cta: "Book a call",
     switchLabel: "PT",
@@ -176,5 +177,13 @@ export const us: SiteContent = {
         body: "For questions about this policy or to request deletion of your data, please use the contact form on the homepage.",
       },
     ],
+  },
+  blog: {
+    title: "Blog",
+    subtitle:
+      "Practical guidance on bookkeeping, financial reporting, and cash flow for small business owners who don't have time to waste.",
+    empty: "No articles published yet. Check back soon.",
+    backToList: "Back to blog",
+    minutesRead: "min read",
   },
 };

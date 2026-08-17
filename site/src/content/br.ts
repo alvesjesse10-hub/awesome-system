@@ -13,6 +13,7 @@ export const br: SiteContent = {
     services: "Serviços",
     howItWorks: "Como funciona",
     about: "Sobre",
+    blog: "Blog",
     contact: "Contato",
     cta: "Agendar conversa",
     switchLabel: "EN",
@@ -176,5 +177,13 @@ export const br: SiteContent = {
         body: "Para dúvidas sobre esta política ou para solicitar a exclusão dos seus dados, utilize o formulário de contato na página inicial.",
       },
     ],
+  },
+  blog: {
+    title: "Blog",
+    subtitle:
+      "Conteúdo prático sobre gestão financeira, controles e dashboards para donos de PME que não têm tempo a perder.",
+    empty: "Ainda não há artigos publicados. Volte em breve.",
+    backToList: "Voltar para o blog",
+    minutesRead: "min de leitura",
   },
 };

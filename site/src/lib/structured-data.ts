@@ -1,5 +1,22 @@
 import type { SiteContent } from "@/types/content";
+import type { BlogPostMeta } from "./blog";
 import { getSiteUrl } from "./site-url";
+
+export function buildArticleSchema(content: SiteContent, post: BlogPostMeta) {
+  const siteUrl = getSiteUrl();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    inLanguage: content.locale,
+    url: `${siteUrl}/${content.market}/blog/${post.slug}`,
+    author: { "@type": "Person", name: "LedgerBridge" },
+    publisher: { "@type": "Organization", name: "LedgerBridge" },
+  };
+}
 
 export function buildProfessionalServiceSchema(content: SiteContent) {
   const siteUrl = getSiteUrl();
