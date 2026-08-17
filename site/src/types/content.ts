@@ -66,5 +66,12 @@ export interface SiteContent {
   footer: {
     tagline: string;
     rights: string;
+    privacyLabel: string;
+  };
+  privacy: {
+    title: string;
+    lastUpdated: string;
+    intro: string;
+    sections: { heading: string; body: string }[];
   };
 }

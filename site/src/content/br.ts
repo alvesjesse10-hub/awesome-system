@@ -147,5 +147,34 @@ export const br: SiteContent = {
   footer: {
     tagline: "Suporte à gestão financeira remoto para pequenas e médias empresas.",
     rights: "Todos os direitos reservados.",
+    privacyLabel: "Política de Privacidade",
+  },
+  privacy: {
+    title: "Política de Privacidade",
+    lastUpdated: "Última atualização: agosto de 2026",
+    intro:
+      "Esta página explica quais dados são coletados através deste site, como são usados e como você pode entrar em contato sobre eles.",
+    sections: [
+      {
+        heading: "Quais dados coletamos",
+        body: "Coletamos apenas os dados que você preenche voluntariamente no formulário de contato: nome, e-mail, empresa e a mensagem enviada.",
+      },
+      {
+        heading: "Como usamos seus dados",
+        body: "Usamos essas informações exclusivamente para responder ao seu contato e, se você concordar em seguir a conversa, para propor e prestar os serviços solicitados. Não vendemos nem compartilhamos seus dados com terceiros para fins de marketing.",
+      },
+      {
+        heading: "Armazenamento",
+        body: "Os dados enviados pelo formulário são encaminhados para uma ferramenta interna de gestão de contatos, usada apenas para organizar o atendimento aos leads. Você pode solicitar a exclusão dos seus dados a qualquer momento.",
+      },
+      {
+        heading: "Cookies",
+        body: "Este site não utiliza cookies de rastreamento de terceiros. Ferramentas de análise de tráfego, quando adicionadas, serão informadas nesta política.",
+      },
+      {
+        heading: "Fale conosco",
+        body: "Para dúvidas sobre esta política ou para solicitar a exclusão dos seus dados, utilize o formulário de contato na página inicial.",
+      },
+    ],
   },
 };

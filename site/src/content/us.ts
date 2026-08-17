@@ -147,5 +147,34 @@ export const us: SiteContent = {
   footer: {
     tagline: "Remote bookkeeping and financial support for U.S. small businesses.",
     rights: "All rights reserved.",
+    privacyLabel: "Privacy Policy",
+  },
+  privacy: {
+    title: "Privacy Policy",
+    lastUpdated: "Last updated: August 2026",
+    intro:
+      "This page explains what data is collected through this site, how it's used, and how to reach out about it.",
+    sections: [
+      {
+        heading: "What we collect",
+        body: "We only collect the information you voluntarily submit through the contact form: name, email, company, and your message.",
+      },
+      {
+        heading: "How we use your data",
+        body: "We use this information solely to respond to your inquiry and, if you choose to move forward, to propose and deliver the requested services. We do not sell or share your data with third parties for marketing purposes.",
+      },
+      {
+        heading: "Storage",
+        body: "Data submitted through the form is forwarded to an internal contact-management tool used only to organize lead follow-up. You can request deletion of your data at any time.",
+      },
+      {
+        heading: "Cookies",
+        body: "This site does not use third-party tracking cookies. If analytics tools are added in the future, this policy will be updated to reflect that.",
+      },
+      {
+        heading: "Contact us",
+        body: "For questions about this policy or to request deletion of your data, please use the contact form on the homepage.",
+      },
+    ],
   },
 };

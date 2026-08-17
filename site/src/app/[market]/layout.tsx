@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { getContent, isMarket, markets } from "@/content";
+import { getSiteUrl } from "@/lib/site-url";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 
@@ -22,14 +23,32 @@ export async function generateMetadata({
   if (!isMarket(market)) return {};
 
   const content = getContent(market);
+  const siteUrl = getSiteUrl();
+
   return {
+    metadataBase: new URL(siteUrl),
     title: content.meta.title,
     description: content.meta.description,
     alternates: {
+      canonical: `/${market}`,
       languages: {
         "pt-BR": "/br",
         "en-US": "/us",
       },
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: "website",
+      url: `/${market}`,
+      siteName: "LedgerBridge",
+      title: content.meta.title,
+      description: content.meta.description,
+      locale: content.locale.replace("-", "_"),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: content.meta.title,
+      description: content.meta.description,
     },
   };
 }
