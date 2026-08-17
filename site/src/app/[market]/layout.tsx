@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { getContent, isMarket, markets } from "@/content";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, isProductionDeployment } from "@/lib/site-url";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 
@@ -36,7 +36,9 @@ export async function generateMetadata({
         "en-US": "/us",
       },
     },
-    robots: { index: true, follow: true },
+    robots: isProductionDeployment()
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
     openGraph: {
       type: "website",
       url: `/${market}`,
